@@ -25,9 +25,9 @@ config = GPTConfig(n_layer=12, n_head=12, n_embd=768, vocab_size=65536)
 model = GPT(config).to(device).train().to(torch.bfloat16)
 print(f"Model: {sum(p.numel() for p in model.parameters()) / 1e6:.1f}M params")
 
-# Test parameters (matching SFT training)
-batch_size = 93  # Auto-discovered optimal
-seq_len = 2047   # Fixed-length padding
+# Test parameters (reduced to fit in memory with gradients)
+batch_size = 32  # Smaller due to training mode (needs memory for gradients)
+seq_len = 2047   # Fixed-length padding (matching SFT)
 num_warmup = 5
 num_iterations = 50
 
