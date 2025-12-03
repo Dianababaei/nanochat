@@ -99,8 +99,7 @@ def generate_with_kvcache_batched(model, tokens_batch, max_tokens, temperature=0
         num_heads=model.config.n_kv_head,
         seq_len=seq_len + max_tokens,
         head_dim=model.config.n_embd // model.config.n_head,
-        num_layers=model.config.n_layer,
-        device=device
+        num_layers=model.config.n_layer
     )
 
     # Phase 1: Prefill (process prompt once)
