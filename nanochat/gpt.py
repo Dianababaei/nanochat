@@ -22,7 +22,7 @@ import torch.nn.functional as F
 from nanochat.common import get_dist_info, print0
 from nanochat.muon import Muon, DistMuon
 from nanochat.adamw import DistAdamW
-from nanochat.engine import KVCache
+# KVCache imported lazily in generate() to avoid circular import
 
 @dataclass
 class GPTConfig:
@@ -299,6 +299,9 @@ class GPT(nn.Module):
         - batch size is 1
         - ids and the yielded tokens are simple Python lists and ints
         """
+        # Import KVCache here to avoid circular import
+        from nanochat.engine import KVCache
+
         assert isinstance(tokens, list)
         device = self.get_device()
         rng = None
