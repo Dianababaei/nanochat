@@ -39,7 +39,7 @@ print(f"Created test model: {sum(p.numel() for p in model.parameters()) / 1e6:.1
 # Test parameters
 prompt_length = 50
 max_new_tokens = 200  # Shorter for faster testing across multiple batch sizes
-batch_sizes_to_test = [1, 4, 8, 16]
+batch_sizes_to_test = [1, 4, 8, 16, 32, 64, 93]
 
 print(f"\nTest configuration:")
 print(f"  - Prompt length: {prompt_length} tokens")
