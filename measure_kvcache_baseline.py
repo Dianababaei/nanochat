@@ -36,9 +36,10 @@ config = GPTConfig(n_layer=12, n_head=12, n_embd=768, vocab_size=65536)
 model = GPT(config).to(device).eval().to(torch.bfloat16)
 print(f"Created test model: {sum(p.numel() for p in model.parameters()) / 1e6:.1f}M params")
 
-# Test parameters
+# Test parameters - MATCH YOUR ORIGINAL BENCHMARK
+# Your accurate_benchmark.py likely used longer sequences
 prompt_length = 50
-max_new_tokens = 100
+max_new_tokens = 1000  # Increase to 200 for more pronounced O(T²) effect
 prompt_tokens = list(range(prompt_length))
 
 print(f"\nTest configuration:")
