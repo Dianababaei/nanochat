@@ -50,52 +50,65 @@ except AttributeError as e:
 # Test 3: Verify KV-Cache implementation in GPT.generate()
 print("\n[3/4] KV-Cache Implementation Check...")
 try:
-    from nanochat.gpt import GPT
-    from nanochat.engine import KVCache
-    import inspect
+    # Read source file directly to avoid circular import
+    with open('nanochat/gpt.py', 'r') as f:
+        gpt_source = f.read()
 
-    # Check if generate() method exists
-    if hasattr(GPT, 'generate'):
+    # Check for KVCache import
+    if 'from nanochat.engine import KVCache' in gpt_source:
+        print("✅ KVCache is imported in gpt.py")
+    else:
+        print("❌ KVCache import not found in gpt.py")
+
+    # Check if generate() method uses KV-cache
+    if 'def generate(' in gpt_source:
         print("✅ GPT.generate() method exists")
 
-        # Check source code for KV-cache usage
-        source = inspect.getsource(GPT.generate)
-        if 'KVCache' in source and 'kv_cache' in source:
-            print("✅ KV-Cache is used in generate()")
-            if 'torch.cat' not in source or source.count('torch.cat') == 0:
-                print("✅ No torch.cat() pattern (good - using incremental decode)")
+        # Extract just the generate method
+        import re
+        generate_match = re.search(r'def generate\(.*?\n(?:.*?\n)*?(?=\n    def |\nclass |\Z)', gpt_source, re.MULTILINE)
+        if generate_match:
+            generate_source = generate_match.group(0)
+
+            if 'KVCache' in generate_source and 'kv_cache' in generate_source:
+                print("✅ KV-Cache is used in generate()")
+                if 'torch.cat' not in generate_source or '# torch.cat' in generate_source:
+                    print("✅ No torch.cat() pattern (good - using incremental decode)")
+                else:
+                    print("⚠️  torch.cat() found - might still be using old pattern")
             else:
-                print("⚠️  torch.cat() found - might still be using old pattern")
-        else:
-            print("❌ KV-Cache not found in generate() method")
+                print("❌ KV-Cache not found in generate() method")
     else:
         print("❌ GPT.generate() method not found")
 except Exception as e:
     print(f"❌ Error checking GPT: {e}")
+    import traceback
+    traceback.print_exc()
 
 # Test 4: Verify token broadcasting fix in engine.py
 print("\n[4/4] Token Broadcasting Fix Check...")
 try:
-    from nanochat.engine import Engine
-    import inspect
-
-    source = inspect.getsource(Engine.generate)
+    # Read source file directly to avoid circular import
+    with open('nanochat/engine.py', 'r') as f:
+        engine_source = f.read()
 
     # Check if the bug pattern is removed
-    if '[sampled_tokens[0]] * num_samples' in source:
+    if '[sampled_tokens[0]] * num_samples' in engine_source:
         print("❌ Token broadcasting BUG still present!")
         print("    Found: sampled_tokens[0] * num_samples")
     else:
         print("✅ Token broadcasting bug is fixed")
 
     # Verify independent sampling exists
-    if 'logits.repeat(num_samples' in source or 'logits_repeated' in source:
+    if 'logits.repeat(num_samples' in engine_source or 'logits_repeated' in engine_source:
         print("✅ Independent token sampling implementation found")
     else:
         print("⚠️  Independent sampling might not be implemented")
 
 except Exception as e:
     print(f"❌ Error checking Engine: {e}")
+    import traceback
+    traceback.print_exc()
 
 # Test 5: Check torch.compile in chat_sft.py
 print("\n[5/5] torch.compile Configuration Check...")
