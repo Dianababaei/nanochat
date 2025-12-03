@@ -119,7 +119,7 @@ try:
     from nanochat.gpt import GPT, GPTConfig
 
     config = GPTConfig(n_layer=12, n_head=12, n_embd=768, vocab_size=65536)
-    model = GPT(config).to(device)
+    model = GPT(config).to(device).to(torch.bfloat16)  # Fix dtype
 
     # Test with conservative batch size (baseline)
     print0("\nTest A: Conservative batch size (baseline - no auto-discovery)")
